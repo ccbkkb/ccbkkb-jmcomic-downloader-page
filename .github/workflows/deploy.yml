@@ -26,12 +26,14 @@ jobs:
         with:
           version: 9
 
+      # 修改点：去掉 working-directory，在根目录执行安装
+      # 这样 pnpm 会读取根目录的 pnpm-workspace.yaml 并正确安装 page 的依赖
       - name: Install Dependencies
-        working-directory: ./page # 进入 page 目录
         run: pnpm install
 
+      # 构建步骤保持在 page 目录执行
       - name: Build Project
-        working-directory: ./page # 进入 page 目录
+        working-directory: ./page
         run: pnpm run build
 
       - name: Publish to Cloudflare Pages
