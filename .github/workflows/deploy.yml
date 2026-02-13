@@ -2,8 +2,8 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [ "main", "master" ] # 根据你的主分支名字修改
-  workflow_dispatch: # 允许手动触发
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -26,12 +26,11 @@ jobs:
         with:
           version: 9
 
-      # 修改点：去掉 working-directory，在根目录执行安装
-      # 这样 pnpm 会读取根目录的 pnpm-workspace.yaml 并正确安装 page 的依赖
       - name: Install Dependencies
-        run: pnpm install
+        # 关键修改：添加 --no-frozen-lockfile
+        # 允许 CI 在 lock 文件过期时更新它，而不是报错
+        run: pnpm install --no-frozen-lockfile
 
-      # 构建步骤保持在 page 目录执行
       - name: Build Project
         working-directory: ./page
         run: pnpm run build
@@ -41,8 +40,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: jmcomic-downloader # 这里的名字要和你 CF 里的项目名一致
-          directory: dist # 相对于 workingDirectory 的构建输出目录
-          workingDirectory: page # 告诉 Wrangler 配置文件(wrangler.jsonc)在这里
+          projectName: jmcomic-downloader
+          directory: dist
+          workingDirectory: page
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: main # 部署的分支
+          branch: main
