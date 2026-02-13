@@ -134,7 +134,7 @@ async function getPDFFromPhoto(photo: Awaited<ReturnType<typeof downloadPhoto>>)
 }
 
 function downloadUint8Array(data: Uint8Array, fileName: string, mimeType: string) {
-	const blob = new Blob([data as Uint8Array<ArrayBuffer>], { type: mimeType });
+    const blob = new Blob([data], { type: mimeType });
 	const url = URL.createObjectURL(blob);
 	const link = document.createElement('a');
 	link.href = url;
