@@ -1,0 +1,46 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [ "main", "master" ] # 根据你的主分支名字修改
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        working-directory: ./page # 进入 page 目录
+        run: pnpm install
+
+      - name: Build Project
+        working-directory: ./page # 进入 page 目录
+        run: pnpm run build
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: jmcomic-downloader # 这里的名字要和你 CF 里的项目名一致
+          directory: dist # 相对于 workingDirectory 的构建输出目录
+          workingDirectory: page # 告诉 Wrangler 配置文件(wrangler.jsonc)在这里
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: main # 部署的分支
